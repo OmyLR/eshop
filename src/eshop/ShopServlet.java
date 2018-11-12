@@ -12,10 +12,13 @@ import javax.servlet.http.HttpSession;
 import eshop.beans.Book;
 import eshop.beans.CartItem;
 import eshop.model.DataManager;
+
+import java.util.HashMap;
 import java.util.Hashtable;
 
 public class ShopServlet extends javax.servlet.http.HttpServlet implements javax.servlet.Servlet {
 	private static final long serialVersionUID = 1L;
+	private HashMap<String, CartItem> shoppingCart;
 
 	public ShopServlet() {
 		super();
@@ -43,34 +46,49 @@ public class ShopServlet extends javax.servlet.http.HttpServlet implements javax
 	}
 
 	protected void addItem(HttpServletRequest request, DataManager dm) {
-		HttpSession session = request.getSession(true);
-		Hashtable<String, CartItem> shoppingCart = (Hashtable<String, CartItem>) session.getAttribute("shoppingCart");
 		if (shoppingCart == null) {
-			shoppingCart = new Hashtable<String, CartItem>(10);
+			shoppingCart = new HashMap<String, CartItem>(10);
 		}
-		String action = request.getParameter("action");
-		if (action != null && action.equals("addItem")) {
-			try {
-				String bookId = request.getParameter("bookId");
-				Book book = dm.getBookDetails(bookId);
-				if (book != null) {
-					CartItem item = new CartItem(book, 1);
-					shoppingCart.remove(bookId);
-					shoppingCart.put(bookId, item);
-					session.setAttribute("carrito", shoppingCart);
-				}
-			} catch (Exception e) {
-				System.out.println("Error adding the selected book to the shopping cart!");
+		try {
+			String bookId = request.getParameter("bookId");
+			Book book = dm.getBookDetails(bookId);
+			if (book != null) {
+				CartItem item = new CartItem(book, 1);
+				shoppingCart.remove(bookId);
+				shoppingCart.put(bookId, item);
+				request.getSession().setAttribute("carrito", shoppingCart);
+				calculateTotalPrice(request);
 			}
+		} catch (Exception e) {
+			request.setAttribute("mensjae", "Error adding the selected book to the shopping cart!");
 		}
 	}
 
-	protected void updateItem() {
-
+	protected void updateItem(HttpServletRequest request) {
+		try {
+				System.out.println("Actualizando!!");
+		      String bookId = request.getParameter("bookId");
+		      String quantity = request.getParameter("quantity");
+		      CartItem item = shoppingCart.get(bookId);
+		      if (item != null) {
+		    	  System.out.println("no está nulo!");
+		    	  item.setQuantity(quantity);
+		    	  calculateTotalPrice(request);
+		      }
+		}catch (Exception e) {
+		     // out.println("Error updating shopping cart!");
+			request.setAttribute("mensaje", "Error updating shopping cart!");
+		}
 	}
 
-	protected void deleteItem() {
-
+	protected void deleteItem(HttpServletRequest request) {
+		try {
+		      String bookId = request.getParameter("bookId");
+		      shoppingCart.remove(bookId);
+		      calculateTotalPrice(request);
+		} catch (Exception e) {
+			request.setAttribute("mensaje", "Error updating shopping cart!");
+		}
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -85,6 +103,7 @@ public class ShopServlet extends javax.servlet.http.HttpServlet implements javax
 		String action = request.getParameter("action");
 		// recuperar  datamanager del contexto
 		DataManager datamanager = (DataManager) request.getServletContext().getAttribute("dataManager");
+		shoppingCart = getShoppingCart(request);
 		if (action != null) {
 			switch (action) {
 			case "search":
@@ -102,21 +121,36 @@ public class ShopServlet extends javax.servlet.http.HttpServlet implements javax
 			case "orderConfirmation":
 				url = base + "OrderConfirmation.jsp";
 				break;
-			case "showCartaddItem":
+			case "addItem":
 				addItem(request, datamanager);
 				url = base + "ShoppingCart.jsp";
 				break;
-			case "showCartupdateItem":
-				updateItem();
+			case "updateItem":
+				updateItem(request);
 				url = base + "ShoppingCart.jsp";
 				break;
-			case "showCartdeleteItem":
-				deleteItem();
+			case "deleteItem":
+				deleteItem(request);
+				url = base + "ShoppingCart.jsp";
+				break;
+			case "showCart":
 				url = base + "ShoppingCart.jsp";
 				break;
 			}
 		}
 		RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher(url);
 		requestDispatcher.forward(request, response);
+	}
+	
+	private HashMap<String, CartItem> getShoppingCart(HttpServletRequest request){
+		return (HashMap<String, CartItem>)request.getSession().getAttribute("carrito");
+	}
+	
+	private void calculateTotalPrice(HttpServletRequest request) {
+		double totalPrice = 0;
+		for(CartItem book : shoppingCart.values()) {
+			totalPrice += book.getPriceQuantity();
+		}
+		request.getSession().setAttribute("totalPrice", totalPrice);
 	}
 }

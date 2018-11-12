@@ -1,5 +1,5 @@
 <%@page language="java" contentType="text/html"%>
-<%@page import="java.util.Hashtable"%>
+<%@page import="java.util.*"%>
 <%@page import="eshop.beans.CartItem"%>
 <html>
 <head>
@@ -14,8 +14,8 @@
   <h2>CheckOut</h2>
 <%
   @SuppressWarnings("unchecked")
-  Hashtable<String, CartItem> shoppingCart =
-      (Hashtable<String, CartItem>)session.getAttribute("shoppingCart");
+  HashMap<String, CartItem> shoppingCart =
+      (HashMap<String, CartItem>)session.getAttribute("carrito");
   if (shoppingCart != null && !shoppingCart.isEmpty()) {
   %>
     <form action="">
