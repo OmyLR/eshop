@@ -1,8 +1,8 @@
 <%@page language="java" contentType="text/html"%>
-<%@page import="java.util.Hashtable"%>
+<%@page import="java.util.*"%>
 <%@page import="eshop.beans.CartItem"%>
-<jsp:useBean id="dataManager" scope="application"
-  class="eshop.model.DataManager"/>
+  <%@ taglib prefix = "c" uri = "http://java.sun.com/jsp/jstl/core" %>
+
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -14,26 +14,12 @@
 <jsp:include page="LeftMenu.jsp" flush="true"/>
 <div class="content">
   <h2>Order</h2>
-  <jsp:useBean id="customer" class="eshop.beans.Customer"/>
-  <jsp:setProperty property="*" name="customer"/>
-<%
-    @SuppressWarnings("unchecked")
-    Hashtable<String, CartItem> cart =
-        (Hashtable<String, CartItem>)session.getAttribute("shoppingCart");
-    long orderId = dataManager.insertOrder(customer, cart);
-    if (orderId > 0L) {
-      session.invalidate();
-  %>
+
       <p class="info">
         Thank you for your purchase.<br/>
-        Your Order Number is: <%=orderId%>
+        Your Order Number is: <c:out value="${orderId}"/>
         </p>
-<%
-      }
-    else {
-      %><p class="error">Unexpected error processing the order!</p><%
-      }
-  %>
+
   </div>
 </body>
 </html>

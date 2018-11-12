@@ -11,6 +11,7 @@ import javax.servlet.http.HttpSession;
 
 import eshop.beans.Book;
 import eshop.beans.CartItem;
+import eshop.beans.Customer;
 import eshop.model.DataManager;
 
 import java.util.HashMap;
@@ -119,6 +120,7 @@ public class ShopServlet extends javax.servlet.http.HttpServlet implements javax
 				url = base + "Checkout.jsp";
 				break;
 			case "orderConfirmation":
+				orderConfirmation(request, datamanager);
 				url = base + "OrderConfirmation.jsp";
 				break;
 			case "addItem":
@@ -153,4 +155,21 @@ public class ShopServlet extends javax.servlet.http.HttpServlet implements javax
 		}
 		request.getSession().setAttribute("totalPrice", totalPrice);
 	}
+	
+	private void orderConfirmation(HttpServletRequest request, DataManager dataManager) {
+		Customer customer = new Customer();
+		customer.setCcExpiryDate(request.getParameter("ccExpiryDate"));
+		customer.setCcName(request.getParameter("ccName"));
+		customer.setCcNumber(request.getParameter("ccNumber"));
+		customer.setDeliveryAddress(request.getParameter("deliveryAddress"));
+		long orderId = dataManager.insertOrder(customer, shoppingCart);
+	    if (orderId > 0L) {
+	      request.getSession().setAttribute("orderId", orderId);
+	      request.getSession().removeAttribute("carrito");
+	      request.getSession().removeAttribute("totalPrice");
+	      shoppingCart = null;
+	    }
+	}
+		
+	
 }
