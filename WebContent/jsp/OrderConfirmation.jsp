@@ -14,7 +14,7 @@
 <jsp:include page="LeftMenu.jsp" flush="true"/>
 <div class="content">
   <h2>Order</h2>
-
+	
       <p class="info">
         Thank you for your purchase.<br/>
         Your Order Number is: <c:out value="${orderId}"/>

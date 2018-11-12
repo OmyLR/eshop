@@ -1,6 +1,8 @@
 package eshop;
 
 import java.io.IOException;
+import java.text.ParseException;
+
 import javax.servlet.ServletException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -61,24 +63,25 @@ public class ShopServlet extends javax.servlet.http.HttpServlet implements javax
 				calculateTotalPrice(request);
 			}
 		} catch (Exception e) {
-			request.setAttribute("mensjae", "Error adding the selected book to the shopping cart!");
+			request.getSession().setAttribute("mensjae", "Error adding the selected book to the shopping cart!");
 		}
 	}
 
 	protected void updateItem(HttpServletRequest request) {
 		try {
-				System.out.println("Actualizando!!");
 		      String bookId = request.getParameter("bookId");
 		      String quantity = request.getParameter("quantity");
+		      int quant = Integer.parseInt(quantity);
 		      CartItem item = shoppingCart.get(bookId);
 		      if (item != null) {
-		    	  System.out.println("no está nulo!");
 		    	  item.setQuantity(quantity);
 		    	  calculateTotalPrice(request);
 		      }
-		}catch (Exception e) {
-		     // out.println("Error updating shopping cart!");
-			request.setAttribute("mensaje", "Error updating shopping cart!");
+		}catch(ParseException e){
+		       request.getSession().setAttribute("mensaje", "");
+		}
+		catch (Exception e) {
+			request.getSession().setAttribute("mensaje", "Error updating shopping cart!");
 		}
 	}
 
@@ -87,7 +90,8 @@ public class ShopServlet extends javax.servlet.http.HttpServlet implements javax
 		      String bookId = request.getParameter("bookId");
 		      shoppingCart.remove(bookId);
 		      calculateTotalPrice(request);
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			request.setAttribute("mensaje", "Error updating shopping cart!");
 		}
 	}

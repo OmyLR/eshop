@@ -67,7 +67,7 @@
           </tr>
         </table>
       </div>
-      <c:if test="${mensaje} != null">
+      <c:if test="${mensaje != null} ">
 		<p class="info">The Shopping cart is empty.</p>
 	   </c:if>
  
